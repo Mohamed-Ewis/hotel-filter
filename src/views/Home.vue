@@ -2,16 +2,16 @@
   <div class="home">
     <div class="container my-4">
       <div class="row">
-        <div class="col-4 dt-container">
+        <div class="col-lg-4 col-md-6 dt-container">
           <label for="date-from" class="text-capitalize ">form :</label>
           <input type="date" id="date-from" v-model="dateFrom" />
         </div>
-        <div class="col-4 dt-container">
+        <div class="col-lg-4 col-md-6 dt-container">
           <label for="date-to" class="text-capitalize ">to :</label>
           <input type="date" id="date-to" v-model="dateTo" />
         </div>
-        <div class="col-4">
-          <button class="text-capitalize search ">
+        <div class="col-lg-4 col-md-6">
+          <button class="text-capitalize search " @click="getFilterdData">
             search
           </button>
         </div>
@@ -19,17 +19,17 @@
     </div>
     <div class="container">
       <div class="row">
-        <div class="col-4"></div>
-        <div class="col-4">
+        <div class="col-lg-4 d-none d-lg-block"></div>
+        <div class="col-lg-4 col-md-6">
           <p>total night : 5</p>
         </div>
-        <div class="col-4 d-flex justify-content-between">
+        <div class="col-lg-4 col-md-6 d-flex justify-content-between">
           <a class="sort" @click="sortName">sort by name</a>
           <a class="sort" @click="sortPrice">sort by price</a>
         </div>
       </div>
       <div class="row pt-4">
-        <div class="col-4">
+        <div class="col-lg-4 ">
           <div class="mb-3">
             <input
               type="text"
@@ -53,10 +53,14 @@
             />
           </div>
         </div>
-        <div class="col-8">
+        <div class="col-lg-8">
           <div class="row">
-            <div class="col-6 " v-for="(hotel, i) in finalData" :key="i">
-              <div class="card px-3 mb-3 ">
+            <div
+              class="col-md-6  mb-3"
+              v-for="(hotel, i) in finalData"
+              :key="i"
+            >
+              <div class="card h-100 px-3 ">
                 <h6 class="text-capitalize">
                   <strong>Name :</strong> {{ hotel.name }}
                 </h6>
@@ -147,6 +151,7 @@ export default {
           available_on: "2020-10-27"
         }
       ],
+      filterData: [],
       inputSearch: "",
       allData: true,
       searchdData: false,
@@ -154,19 +159,6 @@ export default {
     };
   },
   computed: {
-    filterData: {
-      get() {
-        return this.hotels.filter(hotel => {
-          return (
-            hotel.available_on >= this.dateFrom &&
-            hotel.available_on <= this.dateTo
-          );
-        });
-      },
-      set(val) {
-        return val;
-      }
-    },
     finalData() {
       return this.filterData.filter(item => {
         return (
@@ -177,14 +169,14 @@ export default {
     },
     minPrice() {
       if (this.filterData.length > 0) {
-        let filteredPrice = this.filterData.sort((a, b) => a.price - b.price);
-        return filteredPrice[0].price;
+        let min = Math.min(...this.filterData.map(el => el.price));
+        return min;
       }
     },
     maxPrice() {
       if (this.filterData.length > 0) {
-        let filteredPrice = this.filterData.sort((a, b) => a.price - b.price);
-        return filteredPrice[filteredPrice.length - 1].price;
+        let max = Math.max(...this.filterData.map(el => el.price));
+        return max;
       }
     }
   },
@@ -195,18 +187,21 @@ export default {
       this.$axios.get("http://www.mocky.io/v2/5eb8fcb12d0000d088357f2a");
       this.hotelData = response.data;
     },
+    getFilterdData() {
+      this.filterData = this.hotels.filter(hotel => {
+        return (
+          hotel.available_on >= this.dateFrom &&
+          hotel.available_on <= this.dateTo
+        );
+      });
+    },
     sortName() {
-      this.filterData.sort((a, b) => a.name - b.name);
-      console.log(
-        this.filterData.sort((a, b) =>
-          a.name < b.name ? -1 : a.name > b.name ? 1 : 0
-        )
+      this.filterData.sort((a, b) =>
+        a.name < b.name ? -1 : a.name > b.name ? 1 : 0
       );
     },
     sortPrice() {
-      let data = this.filterData.sort((a, b) => a.price - b.price);
-      // this.$set(this.filterData, data);
-      console.log(this.filterData);
+      this.filterData.sort((a, b) => a.price - b.price);
     }
   }
 };
@@ -217,7 +212,9 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-around;
+  color: #fff;
 }
+
 button.search {
   width: 120px;
   height: 40px;
@@ -233,6 +230,7 @@ button.search {
   display: flex;
   align-items: center;
   justify-content: space-around;
+  margin-bottom: 15px;
 }
 a.sort {
   width: auto;
@@ -264,5 +262,17 @@ p {
   height: 40px;
   border-radius: 10px;
   border: 1px solid #ccc;
+}
+@media screen and (max-width: 991px) {
+  .dt-container {
+    justify-content: flex-start !important;
+  }
+  .dt-container label {
+    width: 70px;
+    text-align: left;
+  }
+  button.search {
+    margin: 0 auto 0 0;
+  }
 }
 </style>
